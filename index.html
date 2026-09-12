@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Jim & Emma's Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #eee;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+        
+        .turn-indicator {
+            text-align: center;
+            background: linear-gradient(135deg, rgba(233,69,96,0.3), rgba(255,107,107,0.1));
+            border: 2px solid #e94560;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .turn-indicator.emma {
+            border-color: #00b894;
+            background: linear-gradient(135deg, rgba(0,184,148,0.3), rgba(0,206,201,0.1));
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e94560;
+        }
+        
+        .stat.emma .stat-value {
+            color: #00b894;
+        }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+        }
+        
+        .game-area {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .card-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #e94560;
+            margin-bottom: 10px;
+        }
+        
+        .card-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #888;
+            margin-bottom: 15px;
+        }
+        
+        .card-text {
+            font-size: 1.2rem;
+            line-height: 1.5;
+            color: #fff;
+            text-align: center;
+        }
+        
+        .question-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            width: 100%;
+        }
+        
+        .question-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #e94560;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+        
+        .missed-out {
+            background: rgba(233,69,96,0.1);
+            border: 2px solid #e94560;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .missed-title {
+            color: #e94560;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .missed-action {
+            color: #888;
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+        
+        .stolen-banner {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            animation: pulse 1s ease;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 18px 25px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            color: white;
+            grid-column: span 2;
+        }
+        
+        .btn-primary.emma {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+        }
+        
+        .btn-fail {
+            background: rgba(233,69,96,0.3);
+            color: #e94560;
+            border: 2px solid #e94560;
+        }
+        
+        .btn-favorites {
+            background: rgba(255,255,255,0.05);
+            color: #eee;
+            border: 1px solid rgba(255,255,255,0.2);
+            grid-column: span 2;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+        }
+        
+        .favorites-section {
+            display: none;
+        }
+        
+        .favorite-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #e94560;
+        }
+        
+        .favorite-item.emma {
+            border-left-color: #00b894;
+        }
+        
+        .favorite-date {
+            font-size: 0.7rem;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        
+        .winner-tag {
+            display: inline-block;
+            background: #e94560;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin-left: 10px;
+        }
+        
+        .winner-tag.emma {
+            background: #00b894;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            color: #eee;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="game-section">
+            <h1>Jim & Emma's Game</h1>
+            <p class="subtitle">Answer correctly to win the card</p>
+            
+            <div class="turn-indicator" id="turn-indicator">Jim's Turn</div>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="jim-score">0</div>
+                    <div class="stat-label">Jim's Cards</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="stolen-score">0</div>
+                    <div class="stat-label">Stolen</div>
+                </div>
+                <div class="stat emma">
+                    <div class="stat-value" id="emma-score">0</div>
+                    <div class="stat-label">Emma's Cards</div>
+                </div>
+            </div>
+            
+            <div class="game-area" id="game-area">
+                <div class="empty-state">Press "Draw Card" to start</div>
+            </div>
+            
+            <div class="buttons" id="action-buttons"></div>
+            
+            <button class="btn-favorites" onclick="showFavorites()">❤️ View Won Cards</button>
+        </div>
+        
+        <div id="favorites-section" class="favorites-section">
+            <button class="back-btn" onclick="showGame()">← Back to Game</button>
+            <h1>Cards You've Won</h1>
+            <div id="favorites-list">
+                <div class="empty-state">No cards won yet!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // All 70 actions mapped to numbers 1-70
+        const actions = [
+            // 1-7: Playful & Silly
+            { num: 1, cat: "Playful & Silly", text: "Naked pillow fight until Jim's hard and Emma's wet, then fuck" },
+            { num: 2, cat: "Playful & Silly", text: "Strip Twister - Emma sucks Jim's cock or Jim licks Emma's pussy" },
+            { num: 3, cat: "Playful & Silly", text: "Feed each other fruit, then Jim eats Emma's pussy as dessert" },
+            { num: 4, cat: "Playful & Silly", text: "Bubble bath with waterproof toys and underwater fingering" },
+            { num: 5, cat: "Playful & Silly", text: "Jim tries to make Emma cum before the microwave beeps" },
+            { num: 6, cat: "Playful & Silly", text: "Naked hide and seek - finder gets to fuck the other however they want" },
+            { num: 7, cat: "Playful & Silly", text: "Do shots off Emma's stomach, then trail down to Jim's cock or Emma's pussy" },
+            
+            // 8-14: Oral Sex
+            { num: 8, cat: "Oral Sex", text: "Emma spends 10 minutes sucking Jim's cock with no rushing" },
+            { num: 9, cat: "Oral Sex", text: "69 with Emma's pussy on Jim's face and Jim's cock in her mouth" },
+            { num: 10, cat: "Oral Sex", text: "Emma sits on Jim's face and grinds her pussy on his tongue" },
+            { num: 11, cat: "Oral Sex", text: "Emma gives head while Jim stands, lets him fuck her mouth" },
+            { num: 12, cat: "Oral Sex", text: "Ice cube in Emma's mouth while sucking Jim's cock or Jim licking her clit" },
+            { num: 13, cat: "Oral Sex", text: "Emma deep throats Jim's cock or Jim tongue-fucks Emma's pussy with eye contact" },
+            { num: 14, cat: "Oral Sex", text: "Wake Jim up with Emma's mouth on his morning wood, or Jim licking her wetness" },
+            
+            // 15-21: Sweet & Intimate
+            { num: 15, cat: "Sweet & Intimate", text: "Slow passionate fucking while staring into each other's eyes" },
+            { num: 16, cat: "Sweet & Intimate", text: "Spooning sex with Jim's cock inside Emma from behind" },
+            { num: 17, cat: "Sweet & Intimate", text: "Jim massages Emma's body, then fingers or fucks her slowly" },
+            { num: 18, cat: "Sweet & Intimate", text: "Take turns - one lies back and receives all the pleasure" },
+            { num: 19, cat: "Sweet & Intimate", text: "Shower together, soap each other up, then fuck against the wall" },
+            { num: 20, cat: "Sweet & Intimate", text: "Light candles and make love with deep slow strokes" },
+            { num: 21, cat: "Sweet & Intimate", text: "Jim kisses from Emma's lips to nipples to pussy to toes" },
+            
+            // 22-35: Anal Exploration
+            { num: 22, cat: "Anal Exploration", text: "Emma teases Jim's asshole with a lubed finger while sucking his cock" },
+            { num: 23, cat: "Anal Exploration", text: "Jim rubs Emma's asshole with lube while sucking her clit" },
+            { num: 24, cat: "Anal Exploration", text: "Emma circles Jim's rim with gentle pressure while kissing his neck" },
+            { num: 25, cat: "Anal Exploration", text: "Jim presses his finger against Emma's tight rim while kissing her neck" },
+            { num: 26, cat: "Anal Exploration", text: "Emma slides one finger deep in Jim's ass while stroking his cock" },
+            { num: 27, cat: "Anal Exploration", text: "Jim slides one finger deep in Emma's ass while eating her out" },
+            { num: 28, cat: "Anal Exploration", text: "Spooning with Emma fingering Jim's ass while stroking him" },
+            { num: 29, cat: "Anal Exploration", text: "Spooning with Jim's cock in Emma's ass, whispering dirty love" },
+            { num: 30, cat: "Anal Exploration", text: "Emma massages Jim's prostate while stroking his cock" },
+            { num: 31, cat: "Anal Exploration", text: "Jim massages Emma's G-spot through her anal wall" },
+            { num: 32, cat: "Anal Exploration", text: "Emma rubs Jim's taint while fingering his ass from behind" },
+            { num: 33, cat: "Anal Exploration", text: "Jim rubs Emma's taint while fingering her ass from behind" },
+            { num: 34, cat: "Anal Exploration", text: "Emma presses her thumb in Jim's ass while stroking his cock" },
+            { num: 35, cat: "Anal Exploration", text: "Jim presses his thumb in Emma's ass while fucking her pussy face-to-face" },
+            
+            // 36-42: Mutual & Solo
+            { num: 36, cat: "Mutual & Solo", text: "Stroke Jim's cock and rub Emma's clit together while staring deep" },
+            { num: 37, cat: "Mutual & Solo", text: "Jim watches Emma finger her pussy or Emma watches Jim stroke his cock" },
+            { num: 38, cat: "Mutual & Solo", text: "Jim jerks off or Emma fingers herself while describing filthy things" },
+            { num: 39, cat: "Mutual & Solo", text: "Race to see who can make themselves cum first" },
+            { num: 40, cat: "Mutual & Solo", text: "Emma wraps her hand around Jim's cock or Jim fingers Emma's pussy while they guide each other" },
+            { num: 41, cat: "Mutual & Solo", text: "Bring each other to the edge, then stop together" },
+            { num: 42, cat: "Mutual & Solo", text: "Jim cums on Emma's breasts, face, asshole, pussy or in her mouth - Emma decides where" },
+            
+            // 43-56: Bondage & Restraint
+            { num: 43, cat: "Bondage & Restraint", text: "Tie Emma's wrists to the bedframe and tease her pussy" },
+            { num: 44, cat: "Bondage & Restraint", text: "Emma ties Jim's wrists and rides his cock however she wants" },
+            { num: 45, cat: "Bondage & Restraint", text: "Blindfold Emma, then Jim licks her pussy or fucks her without warning" },
+            { num: 46, cat: "Bondage & Restraint", text: "Blindfold Jim, then Emma teases his cock slowly until he begs" },
+            { num: 47, cat: "Bondage & Restraint", text: "Pin Emma's hands above her head while Jim fucks her" },
+            { num: 48, cat: "Bondage & Restraint", text: "Emma pins Jim's hands and grinds on his cock until he's desperate" },
+            { num: 49, cat: "Bondage & Restraint", text: "Loose ties so Emma can squirm while Jim pounds her" },
+            { num: 50, cat: "Bondage & Restraint", text: "Tie Jim loose so he can watch Emma pleasure herself over him" },
+            { num: 51, cat: "Bondage & Restraint", text: "Spread Emma eagle and Jim eats her out or fucks her raw" },
+            { num: 52, cat: "Bondage & Restraint", text: "Spread Jim eagle and Emma strokes and denies him until he begs" },
+            { num: 53, cat: "Bondage & Restraint", text: "Tie Emma up, then Jim licks from nipples to pussy to ass" },
+            { num: 54, cat: "Bondage & Restraint", text: "Tie Jim up, then Emma rides his face and uses his cock" },
+            { num: 55, cat: "Bondage & Restraint", text: "Emma spanks Jim's ass while riding him reverse cowgirl" },
+            { num: 56, cat: "Bondage & Restraint", text: "Jim spanks Emma's ass red while fucking her from behind" },
+            
+            // 57-63: Fantasy & Roleplay
+            { num: 57, cat: "Fantasy & Roleplay", text: "Pretend they're strangers - Jim picks Emma up at a bar and fucks her in the bathroom" },
+            { num: 58, cat: "Fantasy & Roleplay", text: "Boss Jim makes Emma earn her raise on her knees sucking his cock" },
+            { num: 59, cat: "Fantasy & Roleplay", text: "Massage turns into Jim fingering Emma then fucking her full of cock" },
+            { num: 60, cat: "Fantasy & Roleplay", text: "Teacher Jim punishes Emma with spanking then fucking her over the desk" },
+            { num: 61, cat: "Fantasy & Roleplay", text: "Delivery driver Jim gets pulled inside and fucked by Emma as a tip" },
+            { num: 62, cat: "Fantasy & Roleplay", text: "Photographer Jim gets too handsy, model Emma gets turned on and fucks him" },
+            { num: 63, cat: "Fantasy & Roleplay", text: "Pretend it's their first time - awkward and eager fucking" },
+            
+            // 64-70: Adventurous, Communication, Lazy
+            { num: 64, cat: "Adventurous", text: "Take pictures of your favourite naked parts of each other" },
+            { num: 65, cat: "Adventurous", text: "Pick a new position and try to get Jim's cock deep in Emma" },
+            { num: 66, cat: "Adventurous", text: "Make out in the backseat like teens, then fuck there" },
+            { num: 67, cat: "Communication", text: "Ask Emma's deepest fantasy, then act it out exactly" },
+            { num: 68, cat: "Communication", text: "Emma says 'harder' or 'slower' or 'right there' out loud" },
+            { num: 69, cat: "Lazy & Cozy", text: "Sunday morning lazy fuck, still half asleep" },
+            { num: 70, cat: "Lazy & Cozy", text: "Cuddle with Jim's cock inside Emma until they both pass out" }
+        ];
+
+        // Questions database
+        const questions = [
+            "What's your partner's favorite position?",
+            "Where was your first kiss together?",
+            "What's Jim's biggest turn-on?",
+            "What's Emma's biggest turn-on?",
+            "What's your partner's love language?",
+            "What color underwear is your partner wearing right now?",
+            "What's Jim's favorite thing Emma does in bed?",
+            "What's Emma's favorite thing Jim does in bed?",
+            "Where did you first say 'I love you'?",
+            "What's your partner's favorite body part of theirs?",
+            "What's your partner's favorite body part of yours?",
+            "What's Jim's favorite toy?",
+            "What's Emma's favorite toy?",
+            "What's your partner's biggest fantasy?",
+            "What time of day does your partner prefer sex?",
+            "What's your partner's favorite way to be touched?",
+            "What's something new your partner wants to try?",
+            "What's your partner's favorite memory of you two?",
+            "What does your partner like to hear during sex?",
+            "What's your partner's favorite place to be kissed?"
+        ];
+
+        // Game State
+        let currentTurn = 'jim'; // 'jim' or 'emma'
+        let currentAction = null;
+        let currentQuestion = null;
+        let gameState = 'start'; // start, question, reveal, steal, won, missed
+        let scores = { jim: 0, emma: 0, stolen: 0 };
+        let stealAttempt = false;
+
+        // Load data
+        function loadData() {
+            const saved = localStorage.getItem('jimEmmaGameV2');
+            if (saved) {
+                const data = JSON.parse(saved);
+                scores = data.scores || scores;
+                currentTurn = data.currentTurn || 'jim';
+            }
+            updateTurnDisplay();
+            updateScores();
+        }
+
+        function saveData() {
+            localStorage.setItem('jimEmmaGameV2', JSON.stringify({
+                scores: scores,
+                currentTurn: currentTurn
+            }));
+        }
+
+        function getFavorites() {
+            const saved = localStorage.getItem('jimEmmaFavoritesV2');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function saveFavorite(action, winner) {
+            const favorites = getFavorites();
+            favorites.unshift({
+                num: action.num,
+                cat: action.cat,
+                text: action.text,
+                winner: winner,
+                date: new Date().toLocaleDateString()
+            });
+            localStorage.setItem('jimEmmaFavoritesV2', JSON.stringify(favorites));
+        }
+
+        function updateTurnDisplay() {
+            const indicator = document.getElementById('turn-indicator');
+            indicator.textContent = currentTurn === 'jim' ? "Jim's Turn" : "Emma's Turn";
+            indicator.className = 'turn-indicator ' + (currentTurn === 'emma' ? 'emma' : '');
+        }
+
+        function updateScores() {
+            document.getElementById('jim-score').textContent = scores.jim;
+            document.getElementById('emma-score').textContent = scores.emma;
+            document.getElementById('stolen-score').textContent = scores.stolen;
+        }
+
+        function drawCard() {
+            // Pick random action
+            const randomIndex = Math.floor(Math.random() * actions.length);
+            currentAction = actions[randomIndex];
+            
+            // Pick random question
+            const randomQIndex = Math.floor(Math.random() * questions.length);
+            currentQuestion = questions[randomQIndex];
+            
+            stealAttempt = false;
+            gameState = 'question';
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const gameArea = document.getElementById('game-area');
+            const buttons = document.getElementById('action-buttons');
+            
+            const questionAbout = currentTurn === 'jim' ? 'Emma' : 'Jim';
+            
+            gameArea.innerHTML = `
+                <div class="card-number">#${currentAction.num}</div>
+                <div class="question-box">
+                    <div class="question-label">Answer to unlock this card</div>
+                    <div class="question-text">About ${questionAbout}:<br><strong>${currentQuestion}</strong></div>
+                </div>
+            `;
+            
+            buttons.innerHTML = `
+                <button class="btn-success" onclick="answerCorrect()">✓ Correct!</button>
+                <button class="btn-fail" onclick="answerWrong()">✗ Wrong</button>
+            `;
+        }
+
+        function answerCorrect() {
+            gameState = 'won';
+            const winner = currentTurn;
+            
+            if (winner === 'jim') {
+                scores.jim++;
+            } else {
+                scores.emma++;
+            }
+            
+            saveFavorite(currentAction, winner);
+            saveData();
+            updateScores();
+            
+            showWin(winner);
+        }
+
+        function answerWrong() {
+            if (!stealAttempt) {
+                // First wrong - show missed out and offer steal
+                gameState = 'steal';
+                showMissedWithSteal();
+            } else {
+                // Steal also wrong - nobody wins
+                gameState = 'missed';
+                showNobodyWins();
+            }
+        }
+
+        function showMissedWithSteal() {
+            const gameArea = document.getElementById('game-area');
+            const buttons = document.getElementById('action-buttons');
+            const stealer = currentTurn === 'jim' ? 'Emma' : 'Jim';
+            
+            gameArea.innerHTML = `
+                <div class="missed-out">
+                    <div class="missed-title">😢 YOU MISSED OUT ON:</div>
+                    <div class="card-number" style="font-size: 2rem;">#${currentAction.num}</div>
+                    <div class="card-category">${currentAction.cat}</div>
+                    <div class="missed-action">${currentAction.text}</div>
+                </div>
+                <div style="text-align: center; margin-top: 15px; color: #888;">
+                    ${stealer} can steal this card!
+                </div>
+            `;
+            
+            buttons.innerHTML = `
+                <button class="btn-success" onclick="attemptSteal()">${stealer} Steals!</button>
+                <button class="btn-fail" onclick="skipSteal()">Skip</button>
+            `;
+        }
+
+        function attemptSteal() {
+            stealAttempt = true;
+            // Same question, other player tries
+            showStealQuestion();
+        }
+
+        function showStealQuestion() {
+            const gameArea = document.getElementById('game-area');
+            const buttons = document.getElementById('action-buttons');
+            const stealer = currentTurn === 'jim' ? 'Emma' : 'Jim';
+            
+            gameArea.innerHTML = `
+                <div class="card-number">#${currentAction.num}</div>
+                <div class="stolen-banner">⚡ STEAL ATTEMPT!</div>
+                <div class="question-box">
+                    <div class="question-label">${stealer}'s chance to steal</div>
+                    <div class="question-text">Same question:<br><strong>${currentQuestion}</strong></div>
+                </div>
+            `;
+            
+            buttons.innerHTML = `
+                <button class="btn-success" onclick="stealCorrect()">✓ Steal Successful!</button>
+                <button class="btn-fail" onclick="answerWrong()">✗ Steal Failed</button>
+            `;
+        }
+
+        function stealCorrect() {
+            const stealer = currentTurn === 'jim' ? 'emma' : 'jim';
+            scores.stolen++;
+            saveFavorite(currentAction, stealer);
+            saveData();
+            updateScores();
+            
+            // Switch turn to stealer
+            currentTurn = stealer;
+            updateTurnDisplay();
+            
+            showWin(stealer, true);
+        }
+
+        function skipSteal() {
+            gameState = 'missed';
+            showNobodyWins();
+        }
+
+        function showNobodyWins() {
+            const gameArea = document.getElementById('game-area');
+            const buttons = document.getElementById('action-buttons');
+            
+            gameArea.innerHTML = `
+                <div class="missed-out">
+                    <div class="missed-title">❌ NOBODY WINS</div>
+                    <div class="card-number" style="font-size: 1.5rem; color: #666;">#${currentAction.num}</div>
+                    <div class="missed-action">${currentAction.text}</div>
+                </div>
+            `;
+            
+            buttons.innerHTML = `
+                <button class="btn-primary ${currentTurn === 'emma' ? 'emma' : ''}" onclick="nextTurn()">Next Turn</button>
+            `;
+        }
+
+        function showWin(winner, wasStolen = false) {
+            const gameArea = document.getElementById('game-area');
+            const buttons = document.getElementById('action-buttons');
+            const winnerName = winner === 'jim' ? 'Jim' : 'Emma';
+            
+            gameArea.innerHTML = `
+                <div class="card-number" style="color: #00b894;">#${currentAction.num}</div>
+                <div class="stolen-banner" style="background: ${wasStolen ? 'linear-gradient(135deg, #e94560, #ff6b6b)' : 'linear-gradient(135deg, #00b894, #00cec9)'};">
+                    ${wasStolen ? '🔥 STOLEN!' : '🎉 YOU WON!'}
+                </div>
+                <div class="card-category">${currentAction.cat}</div>
+                <div class="card-text">${currentAction.text}</div>
+            `;
+            
+            buttons.innerHTML = `
+                <button class="btn-primary ${winner === 'emma' ? 'emma' : ''}" onclick="nextTurn()">Complete & Next Turn</button>
+            `;
+        }
+
+        function nextTurn() {
+            // Switch turns
+            currentTurn = currentTurn === 'jim' ? 'emma' : 'jim';
+            updateTurnDisplay();
+            
+            // Reset for new card
+            const gameArea = document.getElementById('game-area');
+            const buttons = document.getElementById('action-buttons');
+            
+            gameArea.innerHTML = '<div class="empty-state">Press "Draw Card" for ' + (currentTurn === 'jim' ? 'Jim' : 'Emma') + '</div>';
+            buttons.innerHTML = `<button class="btn-primary ${currentTurn === 'emma' ? 'emma' : ''}" onclick="drawCard()">🎲 Draw Card</button>`;
+        }
+
+        function showFavorites() {
+            document.getElementById('game-section').style.display = 'none';
+            document.getElementById('favorites-section').style.display = 'block';
+            
+            const favorites = getFavorites();
+            const list = document.getElementById('favorites-list');
+            
+            if (favorites.length === 0) {
+                list.innerHTML = '<div class="empty-state">No cards won yet!</div>';
+                return;
+            }
+            
+            let html = '';
+            favorites.forEach(fav => {
+                html += `<div class="favorite-item ${fav.winner}">
+                    <div class="favorite-date">${fav.date} <span class="winner-tag ${fav.winner}">Won by ${fav.winner === 'jim' ? 'Jim' : 'Emma'}</span></div>
+                    <div style="color: #888; font-size: 0.75rem; margin-bottom: 5px;">#${fav.num} - ${fav.cat}</div>
+                    <div>${fav.text}</div>
+                </div>`;
+            });
+            
+            list.innerHTML = html;
+        }
+
+        function showGame() {
+            document.getElementById('favorites-section').style.display = 'none';
+            document.getElementById('game-section').style.display = 'block';
+        }
+
+        // Initialize
+        loadData();
+        
+        // Set initial button
+        document.getElementById('action-buttons').innerHTML = `
+            <button class="btn-primary ${currentTurn === 'emma' ? 'emma' : ''}" onclick="drawCard()">🎲 Draw Card</button>
+        `;
+    </script>
+</body>
+</html>
