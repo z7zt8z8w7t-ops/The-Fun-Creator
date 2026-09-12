@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Jim & Emma's Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #eee;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+        
+        .card-display {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .card-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #e94560;
+            margin-bottom: 8px;
+        }
+        
+        .card-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #fff;
+        }
+        
+        .combo-display {
+            background: linear-gradient(135deg, rgba(233,69,96,0.2), rgba(255,107,107,0.1));
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 2px solid #e94560;
+        }
+        
+        .combo-title {
+            text-align: center;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #e94560;
+            margin-bottom: 20px;
+        }
+        
+        .scenario-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .scenario-card:last-child {
+            margin-bottom: 0;
+        }
+        
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 18px 25px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            color: white;
+            grid-column: span 2;
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+        }
+        
+        .btn-skip {
+            background: rgba(255,255,255,0.1);
+            color: #888;
+        }
+        
+        .btn-favorites {
+            background: rgba(255,255,255,0.05);
+            color: #eee;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e94560;
+        }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+        }
+        
+        .passes {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+        
+        .passes span {
+            color: #e94560;
+            font-weight: bold;
+        }
+        
+        .favorites-section {
+            display: none;
+        }
+        
+        .favorite-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #e94560;
+        }
+        
+        .favorite-date {
+            font-size: 0.7rem;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            color: #eee;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        @keyframes deal {
+            0% { transform: translateY(-20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        .dealing {
+            animation: deal 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="game-section">
+            <h1>Jim & Emma's Game</h1>
+            <p class="subtitle">Draw cards to create your fantasy</p>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="completed">0</div>
+                    <div class="stat-label">Done</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="favorites">0</div>
+                    <div class="stat-label">Saved</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="streak">0</div>
+                    <div class="stat-label">Streak</div>
+                </div>
+            </div>
+            
+            <div class="passes">Passes remaining: <span id="passes">2</span></div>
+            
+            <div id="cards-container">
+                <div class="empty-state">Press "Draw Cards" to start</div>
+            </div>
+            
+            <div class="buttons" id="action-buttons" style="display: none;">
+                <button class="btn-success" onclick="completeScenario()">✓ Complete & Save</button>
+                <button class="btn-skip" onclick="skipScenario()">↷ Pass</button>
+            </div>
+            
+            <div class="buttons">
+                <button class="btn-primary" onclick="drawCards()">🎲 Draw Cards</button>
+                <button class="btn-favorites" onclick="showFavorites()">❤️ Favorites</button>
+            </div>
+        </div>
+        
+        <div id="favorites-section" class="favorites-section">
+            <button class="back-btn" onclick="showGame()">← Back to Game</button>
+            <h1>Your Favorites</h1>
+            <div id="favorites-list">
+                <div class="empty-state">No favorites yet. Complete scenarios to save them!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game Data
+        const categories = {
+            playful: [
+                "Naked pillow fight until Jim's hard and Emma's wet, then fuck",
+                "Strip Twister - Emma sucks Jim's cock or Jim licks Emma's pussy",
+                "Feed each other fruit, then Jim eats Emma's pussy as dessert",
+                "Bubble bath with waterproof toys and underwater fingering",
+                "Jim tries to make Emma cum before the microwave beeps",
+                "Naked hide and seek - finder gets to fuck the other however they want",
+                "Do shots off Emma's stomach, then trail down to Jim's cock or Emma's pussy"
+            ],
+            oral: [
+                "Emma spends 10 minutes sucking Jim's cock with no rushing",
+                "69 with Emma's pussy on Jim's face and Jim's cock in her mouth",
+                "Emma sits on Jim's face and grinds her pussy on his tongue",
+                "Emma gives head while Jim stands, lets him fuck her mouth",
+                "Ice cube in Emma's mouth while sucking Jim's cock or Jim licking her clit",
+                "Emma deep throats Jim's cock or Jim tongue-fucks Emma's pussy with eye contact",
+                "Wake Jim up with Emma's mouth on his morning wood, or Jim licking her wetness"
+            ],
+            intimate: [
+                "Slow passionate fucking while staring into each other's eyes",
+                "Spooning sex with Jim's cock inside Emma from behind",
+                "Jim massages Emma's body, then fingers or fucks her slowly",
+                "Take turns - one lies back and receives all the pleasure",
+                "Shower together, soap each other up, then fuck against the wall",
+                "Light candles and make love with deep slow strokes",
+                "Jim kisses from Emma's lips to nipples to pussy to toes"
+            ],
+            anal: [
+                "Emma teases Jim's asshole with a lubed finger while sucking his cock",
+                "Jim rubs Emma's asshole with lube while sucking her clit",
+                "Emma circles Jim's rim with gentle pressure while kissing his neck",
+                "Jim presses his finger against Emma's tight rim while kissing her neck",
+                "Emma slides one finger deep in Jim's ass while stroking his cock",
+                "Jim slides one finger deep in Emma's ass while eating her out",
+                "Spooning with Emma fingering Jim's ass while stroking him",
+                "Spooning with Jim's cock in Emma's ass, whispering dirty love",
+                "Emma massages Jim's prostate while stroking his cock",
+                "Jim massages Emma's G-spot through her anal wall",
+                "Emma rubs Jim's taint while fingering his ass from behind",
+                "Jim rubs Emma's taint while fingering her ass from behind",
+                "Emma presses her thumb in Jim's ass while stroking his cock",
+                "Jim presses his thumb in Emma's ass while fucking her pussy face-to-face"
+            ],
+            mutual: [
+                "Stroke Jim's cock and rub Emma's clit together while staring deep",
+                "Jim watches Emma finger her pussy or Emma watches Jim stroke his cock",
+                "Jim jerks off or Emma fingers herself while describing filthy things",
+                "Race to see who can make themselves cum first",
+                "Emma wraps her hand around Jim's cock or Jim fingers Emma's pussy while they guide each other",
+                "Bring each other to the edge, then stop together",
+                "Jim cums on Emma's breasts, face, asshole, pussy or in her mouth - Emma decides where"
+            ],
+            bondage: [
+                "Tie Emma's wrists to the bedframe and tease her pussy",
+                "Emma ties Jim's wrists and rides his cock however she wants",
+                "Blindfold Emma, then Jim licks her pussy or fucks her without warning",
+                "Blindfold Jim, then Emma teases his cock slowly until he begs",
+                "Pin Emma's hands above her head while Jim fucks her",
+                "Emma pins Jim's hands and grinds on his cock until he's desperate",
+                "Loose ties so Emma can squirm while Jim pounds her",
+                "Tie Jim loose so he can watch Emma pleasure herself over him",
+                "Spread Emma eagle and Jim eats her out or fucks her raw",
+                "Spread Jim eagle and Emma strokes and denies him until he begs",
+                "Tie Emma up, then Jim licks from nipples to pussy to ass",
+                "Tie Jim up, then Emma rides his face and uses his cock",
+                "Emma spanks Jim's ass while riding him reverse cowgirl",
+                "Jim spanks Emma's ass red while fucking her from behind"
+            ],
+            fantasy: [
+                "Pretend they're strangers - Jim picks Emma up at a bar and fucks her in the bathroom",
+                "Boss Jim makes Emma earn her raise on her knees sucking his cock",
+                "Massage turns into Jim fingering Emma then fucking her full of cock",
+                "Teacher Jim punishes Emma with spanking then fucking her over the desk",
+                "Delivery driver Jim gets pulled inside and fucked by Emma as a tip",
+                "Photographer Jim gets too handsy, model Emma gets turned on and fucks him",
+                "Pretend it's their first time - awkward and eager fucking"
+            ],
+            adventurous: [
+                "Take pictures of your favourite naked parts of each other",
+                "Pick a new position and try to get Jim's cock deep in Emma",
+                "Make out in the backseat like teens, then fuck there",
+                "Dance naked, then Jim bends Emma over to their song",
+                "Eat breakfast off Emma's naked body, then Jim fucks her sticky",
+                "Shower sex - Jim holds Emma up and fucks her against the tile",
+                "Fuck in every room - kitchen counter, couch, floor"
+            ],
+            communication: [
+                "Ask Emma's deepest fantasy, then act it out exactly",
+                "Emma says 'harder' or 'slower' or 'right there' out loud",
+                "Aftercare with Jim's cum still on or in Emma, stroking her hair",
+                "Jim gives Emma head or fucks her with no expectation of return",
+                "Hold hands while Jim's cock is deep inside Emma",
+                "Jim whispers 'I love how your pussy feels around my cock'",
+                "Jim asks 'you like that?' and makes Emma answer while he fucks her"
+            ],
+            lazy: [
+                "Sunday morning lazy fuck, still half asleep",
+                "Netflix on, Emma's hand on Jim's cock or Jim's hand in her pussy, then fuck during credits",
+                "Cuddle with Jim's cock inside Emma until they both pass out",
+                "Wake Emma up by Jim sliding his cock inside her, or Jim licking her awake",
+                "Pajamas on, just pull them down and Jim fucks Emma from behind",
+                "Naptime turns into sleepy slow sex",
+                "Rainy day - stay in bed and fuck three times"
+            ]
+        };
+
+        const categoryNames = {
+            playful: "Playful & Silly",
+            oral: "Oral Sex",
+            intimate: "Sweet & Intimate",
+            anal: "Anal Exploration",
+            mutual: "Mutual & Solo",
+            bondage: "Bondage & Restraint",
+            fantasy: "Fantasy & Roleplay",
+            adventurous: "Adventurous",
+            communication: "Communication",
+            lazy: "Lazy & Cozy"
+        };
+
+        // Game State
+        let currentScenario = null;
+        let passesRemaining = 2;
+        let stats = {
+            completed: 0,
+            favorites: 0,
+            streak: 0
+        };
+
+        // Load from localStorage
+        function loadData() {
+            const saved = localStorage.getItem('jimEmmaGame');
+            if (saved) {
+                const data = JSON.parse(saved);
+                stats = data.stats || stats;
+                passesRemaining = data.passesRemaining || 2;
+            }
+            updateStats();
+        }
+
+        function saveData() {
+            localStorage.setItem('jimEmmaGame', JSON.stringify({
+                stats: stats,
+                passesRemaining: passesRemaining,
+                favorites: getFavorites()
+            }));
+        }
+
+        function getFavorites() {
+            const saved = localStorage.getItem('jimEmmaFavorites');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function saveFavorite(scenario) {
+            const favorites = getFavorites();
+            favorites.unshift({
+                ...scenario,
+                date: new Date().toLocaleDateString()
+            });
+            localStorage.setItem('jimEmmaFavorites', JSON.stringify(favorites));
+        }
+
+        function drawCards() {
+            // Reset passes for new session
+            passesRemaining = 2;
+            
+            // Pick 2-3 random categories
+            const keys = Object.keys(categories);
+            const numCards = Math.random() > 0.5 ? 3 : 2;
+            const selected = [];
+            
+            while (selected.length < numCards) {
+                const key = keys[Math.floor(Math.random() * keys.length)];
+                if (!selected.includes(key)) {
+                    selected.push(key);
+                }
+            }
+            
+            // Pick random card from each category
+            currentScenario = selected.map(key => {
+                const cards = categories[key];
+                return {
+                    category: key,
+                    categoryName: categoryNames[key],
+                    text: cards[Math.floor(Math.random() * cards.length)]
+                };
+            });
+            
+            displayCards();
+            updateStats();
+        }
+
+        function displayCards() {
+            const container = document.getElementById('cards-container');
+            const buttons = document.getElementById('action-buttons');
+            
+            let html = '<div class="combo-display dealing">';
+            html += '<div class="combo-title">Your Scenario</div>';
+            
+            currentScenario.forEach((card, i) => {
+                html += `<div class="scenario-card">
+                    <div class="card-category">${card.categoryName}</div>
+                    <div class="card-text">${card.text}</div>
+                </div>`;
+                if (i < currentScenario.length - 1) {
+                    html += '<div style="text-align: center; color: #e94560; margin: 10px 0;">+</div>';
+                }
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+            buttons.style.display = 'grid';
+        }
+
+        function completeScenario() {
+            stats.completed++;
+            stats.streak++;
+            stats.favorites++;
+            
+            saveFavorite({
+                cards: currentScenario
+            });
+            
+            // Reset
+            currentScenario = null;
+            passesRemaining = 2;
+            
+            document.getElementById('cards-container').innerHTML = '<div class="empty-state" style="color: #00b894;">✓ Saved to favorites!<br>Draw again to continue</div>';
+            document.getElementById('action-buttons').style.display = 'none';
+            
+            updateStats();
+            saveData();
+        }
+
+        function skipScenario() {
+            if (passesRemaining > 0) {
+                passesRemaining--;
+                drawCards();
+            } else {
+                alert('No passes remaining! Complete this scenario or refresh to reset.');
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('completed').textContent = stats.completed;
+            document.getElementById('favorites').textContent = stats.favorites;
+            document.getElementById('streak').textContent = stats.streak;
+            document.getElementById('passes').textContent = passesRemaining;
+        }
+
+        function showFavorites() {
+            document.getElementById('game-section').style.display = 'none';
+            document.getElementById('favorites-section').style.display = 'block';
+            
+            const favorites = getFavorites();
+            const list = document.getElementById('favorites-list');
+            
+            if (favorites.length === 0) {
+                list.innerHTML = '<div class="empty-state">No favorites yet. Complete scenarios to save them!</div>';
+                return;
+            }
+            
+            let html = '';
+            favorites.forEach(fav => {
+                html += `<div class="favorite-item">
+                    <div class="favorite-date">${fav.date}</div>
+                    ${fav.cards.map(c => `<div style="margin-bottom: 8px; padding-left: 10px; border-left: 2px solid rgba(233,69,96,0.3);">
+                        <small style="color: #e94560;">${c.categoryName}</small><br>
+                        ${c.text}
+                    </div>`).join('<div style="text-align: center; margin: 5px 0; color: #666;">+</div>')}
+                </div>`;
+            });
+            
+            list.innerHTML = html;
+        }
+
+        function showGame() {
+            document.getElementById('favorites-section').style.display = 'none';
+            document.getElementById('game-section').style.display = 'block';
+        }
+
+        // Initialize
+        loadData();
+    </script>
+</body>
+</html>
